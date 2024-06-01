@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>To-Do List</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Roboto', sans-serif;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #007bff;
+            margin-top: 20px;
+        }
+
+        #valtext {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1.2em;
+            width: 80%;
+            max-width: 300px;
+            height: 40px;
+            padding: 5px 10px;
+            margin: 20px 0;
+        }
+
+        #buttonjs {
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 80%;
+            max-width: 200px;
+            height: 40px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        #buttonjs:hover {
+            background-color: #0056b3;
+        }
+
+        #display-div {
+            text-align: left;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .task {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .task.done {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .task button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .task button:hover {
+            background-color: #218838;
+        }
+
+        .task button.edit {
+            background-color: #ffc107;
+        }
+
+        .task button.edit:hover {
+            background-color: #e0a800;
+        }
+
+        .task button.delete {
+            background-color: #dc3545;
+        }
+
+        .task button.delete:hover {
+            background-color: #c82333;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            #valtext,
+            #buttonjs {
+                width: 90%;
+                font-size: 1em;
+            }
+
+            .task {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .task button {
+                width: 100%;
+                margin-top: 5px;
+                margin-left: 0;
+            }
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+</head>
+
+<body>
+    <h1>To-Do List</h1>
+    <input type="text" id="valtext" placeholder="Type your tasks here.....">
+    <button type="button" id="buttonjs" onclick="lister()">Enter</button>
+    <hr>
+    <div id="display-div"></div>
+
+    <script>
+        let taskList = [];
+
+        function lister() {
+            let x = document.getElementById("valtext").value;
+            document.getElementById('valtext').value = "";
+            if (x != '') {
+                taskList.push({ text: x, editable: false, done: false });
+            }
+            displayTasks();
+            localStorage.setItem("todolist", JSON.stringify(taskList));
+        }
+
+        function displayTasks() {
+            let list = "Your Tasks are:<br>";
+            for (let j = 0; j < taskList.length; j++) {
+                let task = taskList[j];
+                if (task.editable) {
+                    list += `
+                        <div class="task">
+                            <input type="text" id="edit-${j}" value="${task.text}">
+                            <button onclick="saveTask(${j})">Save</button>
+                        </div>`;
+                } else {
+                    list += `
+                        <div class="task ${task.done ? 'done' : ''}">
+                            ${task.text}
+                            <div>
+                                <button class="edit" onclick="editTask(${j})">Edit</button>
+                                <button onclick="markDone(${j})">${task.done ? 'Undone' : 'Done'}</button>
+                                <button class="delete" onclick="deleteTask(${j})">Delete</button>
+                            </div>
+                        </div>`;
+                }
+            }
+            document.getElementById("display-div").innerHTML = list;
+        }
+
+        function deleteTask(index) {
+            taskList.splice(index, 1);
+            displayTasks();
+            localStorage.setItem("todolist", JSON.stringify(taskList));
+        }
+
+        function editTask(index) {
+            taskList[index].editable = true;
+            displayTasks();
+        }
+
+        function saveTask(index) {
+            let editedText = document.getElementById(`edit-${index}`).value;
+            taskList[index].text = editedText;
+            taskList[index].editable = false;
+            displayTasks();
+            localStorage.setItem("todolist", JSON.stringify(taskList));
+        }
+
+        function markDone(index) {
+            taskList[index].done = !taskList[index].done;
+            displayTasks();
+            localStorage.setItem("todolist", JSON.stringify(taskList));
+        }
+
+        window.onload = function() {
+            let storedTaskList = JSON.parse(localStorage.getItem("todolist"));
+            if (storedTaskList) {
+                taskList = storedTaskList;
+                displayTasks();
+            }
+        }
+    </script>
+</body>
+
+</html>
